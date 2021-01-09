@@ -1,7 +1,11 @@
 from dataclasses import dataclass
 from typing import Optional, Union, cast
 
+from httpx import AsyncClient
+
 from public_suffix.trie import PublicSuffixListTrieNode
+
+PUBLIC_SUFFIX_LIST_URL = 'https://publicsuffix.org/list/public_suffix_list.dat'
 
 
 @dataclass
@@ -9,6 +13,13 @@ class DomainProperties:
     effective_top_level_domain: str
     registered_domain: str
     subdomain: str
+
+    def __str__(self) -> str:
+        return (
+            f'Effective top-level domain (eTLD): {self.effective_top_level_domain}\n'
+            f'Registered domain: {self.registered_domain}\n'
+            f'Subdomain: {self.subdomain}'
+        )
 
 
 def get_domain_properties(root_node: PublicSuffixListTrieNode, domain: str) -> DomainProperties:
@@ -54,3 +65,25 @@ def get_domain_properties(root_node: PublicSuffixListTrieNode, domain: str) -> D
         ),
         subdomain='.'.join(dns_name_components[:hit_index-1])
     )
+
+
+async def _download_public_suffix_list(http_client: AsyncClient) -> str:
+    response = await http_client.get(PUBLIC_SUFFIX_LIST_URL)
+    response.raise_for_status()
+
+    return response.text
+
+
+async def download_public_suffix_list(http_client: Optional[AsyncClient] = None) -> str:
+    """
+    Download the Public Suffix List.
+
+    :param http_client: An HTTP client with which to retrieve the Public Suffix List.
+    :return: The Public Suffix List as string.
+    """
+
+    if not http_client:
+        async with AsyncClient() as http_client:
+            return await _download_public_suffix_list(http_client=http_client)
+    else:
+        return await _download_public_suffix_list(http_client=http_client)
