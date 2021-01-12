@@ -70,7 +70,7 @@ class PublicSuffixArgumentParser(ArgumentParser):
 
             if domain_name is not None:
                 if not PublicSuffixArgumentParser._DOMAIN_NAME_PATTERN.search(string=domain_name):
-                    parser.error(message=f'The input domain name is not in the correct format.')
+                    parser.error(message=f'The input domain name is not in the correct format: {domain_name}')
 
                 domain_names.add(domain_name)
 
@@ -87,9 +87,9 @@ class PublicSuffixArgumentParser(ArgumentParser):
         ):
             domain_names: set[str] = getattr(namespace, 'domain_names', set())
 
-            for domain_name in domain_names_file.read().splitlines():
+            for line_number, domain_name in enumerate(domain_names_file.read().splitlines(), start=1):
                 if not PublicSuffixArgumentParser._DOMAIN_NAME_PATTERN.search(string=domain_name):
-                    parser.error(message=f'The input domain name is not in the correct format.')
+                    parser.error(message=f'An input domain name is not in the correct format ({domain_names_file.name}:{line_number}): {domain_name}')
 
                 domain_names.add(domain_name)
 
