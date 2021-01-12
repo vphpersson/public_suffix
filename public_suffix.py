@@ -7,6 +7,7 @@ from re import compile as re_compile
 from dataclasses import asdict
 from json import dumps as json_dumps
 from io import TextIOWrapper
+from sys import stdin
 
 from pyutils.my_string import text_align_delimiter
 
@@ -16,24 +17,31 @@ from public_suffix.trie import PublicSuffixListTrie, PublicSuffixListTrieNode
 
 class PublicSuffixArgumentParser(ArgumentParser):
 
-    _FQDN_PATTERN = re_compile(pattern=r'^([a-zA-Z0-9._-])+$')
+    _DOMAIN_NAME_PATTERN = re_compile(pattern=r'^([a-zA-Z0-9._-])+$')
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        fqdn_input_group = self.add_mutually_exclusive_group(required=True)
-
-        fqdn_input_group.add_argument(
-            '--fqdn',
-            help='A fully-qualified domain name about which to retrieve information.',
-            action=self._ParseFQDNAction
+        super().__init__(
+            *args,
+            description='Obtain properties about a domain name using the Public Suffix list.',
+            epilog=(
+                'If no domain name or file path is provided, input is read from standard input (stdin). '
+                'If no public suffix list file path is provided, the list is downloaded.'
+            ),
+            **kwargs
         )
 
-        fqdn_input_group.add_argument(
-            '--fqdns-file',
-            help='A path of a file storing FQDNs.',
+        self.add_argument(
+            'domain_name',
+            help='A domain name about which to retrieve information.',
+            action=self._ParseDomainNameAction,
+            nargs='?'
+        )
+
+        self.add_argument(
+            '--domain-names-file',
+            help='A path of a file storing domain names about which to retrieve information.',
             type=FileType('r', encoding='utf-8'),
-            action=self._ParseFQDNFileAction
+            action=self._ParseDomainNamesFileAction
         )
 
         self.add_argument(
@@ -48,44 +56,45 @@ class PublicSuffixArgumentParser(ArgumentParser):
             action='store_true'
         )
 
-    class _ParseFQDNAction(Action):
+    class _ParseDomainNameAction(Action):
         def __call__(
             self,
             parser: ArgumentParser,
             namespace: Namespace,
-            fqdn: str,
+            domain_name: Optional[str],
             option_string: Optional[str] = None
         ):
             """Check if an input fully-qualified domain name is in the correct format."""
 
-            fqdns: set[str] = getattr(namespace, 'fqdns', set())
+            domain_names: set[str] = getattr(namespace, 'domain_names', set())
 
-            if not PublicSuffixArgumentParser._FQDN_PATTERN.search(string=fqdn):
-                parser.error(message=f'The input FQDN is not in the correct format.')
+            if domain_name is not None:
+                if not PublicSuffixArgumentParser._DOMAIN_NAME_PATTERN.search(string=domain_name):
+                    parser.error(message=f'The input domain name is not in the correct format.')
 
-            fqdns.add(fqdn)
+                domain_names.add(domain_name)
 
-            setattr(namespace, self.dest, fqdn)
-            setattr(namespace, 'fqdns', fqdns)
+            setattr(namespace, self.dest, domain_name)
+            setattr(namespace, 'domain_names', domain_names)
 
-    class _ParseFQDNFileAction(Action):
+    class _ParseDomainNamesFileAction(Action):
         def __call__(
             self,
             parser: ArgumentParser,
             namespace: Namespace,
-            fqdns_file: TextIOWrapper,
+            domain_names_file: TextIOWrapper,
             option_string: Optional[str] = None
         ):
-            fqdns: set[str] = getattr(namespace, 'fqdns', set())
+            domain_names: set[str] = getattr(namespace, 'domain_names', set())
 
-            for fqdn in fqdns_file.read().splitlines():
-                if not PublicSuffixArgumentParser._FQDN_PATTERN.search(string=fqdn):
-                    parser.error(message=f'The input FQDN is not in the correct format.')
+            for domain_name in domain_names_file.read().splitlines():
+                if not PublicSuffixArgumentParser._DOMAIN_NAME_PATTERN.search(string=domain_name):
+                    parser.error(message=f'The input domain name is not in the correct format.')
 
-                fqdns.add(fqdn)
+                domain_names.add(domain_name)
 
-            setattr(namespace, self.dest, fqdns_file)
-            setattr(namespace, 'fqdns', fqdns)
+            setattr(namespace, self.dest, domain_names_file)
+            setattr(namespace, 'domain_names', domain_names)
 
 
 async def main():
@@ -100,8 +109,8 @@ async def main():
     )
 
     domain_properties_list: list[DomainProperties] = [
-        public_suffix_list_trie.get_domain_properties(domain=fqdn)
-        for fqdn in args.fqdns
+        public_suffix_list_trie.get_domain_properties(domain=domain_name.strip())
+        for domain_name in (args.domain_names or stdin)
     ]
 
     print(
