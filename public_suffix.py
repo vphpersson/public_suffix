@@ -114,7 +114,7 @@ async def main():
     ]
 
     print(
-        json_dumps([asdict(domain_properties) for domain_properties in domain_properties_list])if args.json
+        json_dumps([asdict(domain_properties) for domain_properties in domain_properties_list]) if args.json
         else '\n\n'.join(text_align_delimiter(text=str(domain_properties)) for domain_properties in domain_properties_list)
     )
 
