@@ -103,8 +103,11 @@ async def main():
     public_suffix_list_trie = PublicSuffixListTrie(
         root_node=PublicSuffixListTrieNode.from_public_suffix_list(
             rules=(
-                args.list_file_path.read() if args.list_file_path else (await download_public_suffix_list())
-            ).splitlines()
+                stripped_line.encode(encoding='idna').decode()
+                for line in (args.list_file_path.read() if args.list_file_path else (await download_public_suffix_list())).splitlines()
+                if (stripped_line := line.strip()) and not stripped_line.startswith('//')
+            )
+
         )
     )
 

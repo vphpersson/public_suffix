@@ -6,7 +6,6 @@ from functools import partial
 
 @dataclass
 class TrieNode:
-    parent: Optional[TrieNode] = None
     key_to_child: dict[str, TrieNode] = field(default_factory=dict)
 
 
@@ -30,7 +29,6 @@ class PublicSuffixListTrieNode(TrieNode):
             current_node = root_node
             for dns_name_component in dns_name.split('.')[::-1]:
                 next_node = current_node.key_to_child.setdefault(dns_name_component, PublicSuffixListTrieNode())
-                next_node.parent = current_node
                 next_node.dns_name_component = dns_name_component
 
                 current_node = next_node
@@ -46,7 +44,7 @@ class PublicSuffixListTrieNode(TrieNode):
             rules=(
                 stripped_line.encode(encoding='idna').decode()
                 for line in file
-                if (stripped_line := line.strip()) and not line.startswith('//')
+                if (stripped_line := line.strip()) and not stripped_line.startswith('//')
             )
         )
 
