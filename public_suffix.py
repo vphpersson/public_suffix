@@ -107,7 +107,6 @@ async def main():
                 for line in (args.list_file_path.read() if args.list_file_path else (await download_public_suffix_list())).splitlines()
                 if (stripped_line := line.strip()) and not stripped_line.startswith('//')
             )
-
         )
     )
 
@@ -117,8 +116,13 @@ async def main():
     ]
 
     print(
-        json_dumps([asdict(domain_properties) for domain_properties in domain_properties_list]) if args.json
-        else '\n\n'.join(text_align_delimiter(text=str(domain_properties)) for domain_properties in domain_properties_list)
+        json_dumps([
+            (asdict(domain_properties) if domain_properties is not None else None)
+            for domain_properties in domain_properties_list
+        ]) if args.json else '\n\n'.join(
+            (text_align_delimiter(text=str(domain_properties)) if domain_properties is not None else 'None')
+            for domain_properties in domain_properties_list
+        )
     )
 
 

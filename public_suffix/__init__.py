@@ -22,7 +22,7 @@ class DomainProperties:
         )
 
 
-def get_domain_properties(root_node: PublicSuffixListTrieNode, domain: str) -> DomainProperties:
+def get_domain_properties(root_node: PublicSuffixListTrieNode, domain: str) -> Optional[DomainProperties]:
     """
     Retrieves properties of a domain name using the public suffix list.
 
@@ -55,15 +55,15 @@ def get_domain_properties(root_node: PublicSuffixListTrieNode, domain: str) -> D
 
     hit_index = match_map.index(False)
 
-    effective_top_level_domain = '.'.join(dns_name_components[hit_index:])
+    effective_top_level_domain: str = '.'.join(dns_name_components[hit_index:])
+
+    if effective_top_level_domain not in root_node.key_to_child:
+        return None
+
     return DomainProperties(
         effective_top_level_domain=effective_top_level_domain,
-        registered_domain=(
-            registered_domain
-            if (registered_domain := '.'.join(dns_name_components[hit_index-1:])) != effective_top_level_domain
-            else ''
-        ),
-        subdomain='.'.join(dns_name_components[:hit_index-1])
+        registered_domain='.'.join(dns_name_components[hit_index - 1:]),
+        subdomain='.'.join(dns_name_components[:hit_index - 1])
     )
 
 
