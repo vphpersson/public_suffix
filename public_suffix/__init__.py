@@ -57,12 +57,14 @@ def get_domain_properties(root_node: PublicSuffixListTrieNode, domain: str) -> O
 
     effective_top_level_domain: str = '.'.join(dns_name_components[hit_index:])
 
-    if effective_top_level_domain not in root_node.key_to_child:
+    registered_domain = '.'.join(dns_name_components[hit_index - 1:])
+
+    if effective_top_level_domain not in root_node.key_to_child and registered_domain == effective_top_level_domain:
         return None
 
     return DomainProperties(
         effective_top_level_domain=effective_top_level_domain,
-        registered_domain='.'.join(dns_name_components[hit_index - 1:]),
+        registered_domain=registered_domain,
         subdomain='.'.join(dns_name_components[:hit_index - 1])
     )
 
