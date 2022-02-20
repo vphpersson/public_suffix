@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Union, cast
+from typing import Optional, cast
 
 from httpx import AsyncClient
 
@@ -33,7 +33,7 @@ def get_domain_properties(root_node: PublicSuffixListTrieNode, domain: str) -> O
 
     dns_name_components: list[str] = domain.lower().split('.')
 
-    match_map: list[Union[bool, None]] = [None] * len(dns_name_components)
+    match_map: list[Optional[bool]] = [None] * len(dns_name_components)
 
     def traverse_node(node: PublicSuffixListTrieNode, depth: int = 1) -> None:
         if depth == 1:
@@ -46,6 +46,7 @@ def get_domain_properties(root_node: PublicSuffixListTrieNode, domain: str) -> O
                 continue
 
             match_map[-depth] = next_node.negate
+
             if depth == len(dns_name_components):
                 return
 
@@ -56,8 +57,7 @@ def get_domain_properties(root_node: PublicSuffixListTrieNode, domain: str) -> O
     hit_index = match_map.index(False)
 
     effective_top_level_domain: str = '.'.join(dns_name_components[hit_index:])
-
-    registered_domain = '.'.join(dns_name_components[hit_index - 1:])
+    registered_domain: str = '.'.join(dns_name_components[hit_index - 1:])
 
     if effective_top_level_domain not in root_node.key_to_child and registered_domain == effective_top_level_domain:
         return None

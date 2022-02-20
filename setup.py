@@ -6,6 +6,6 @@ setup(
     packages=find_packages(),
     install_requires=[
         'httpx',
-        'pyutils @ git+ssh://git@github.com/vphpersson/pyutils.git#egg=pyutils'
+        'pyutils @ git+https://github.com/vphpersson/pyutils.git#egg=pyutils'
     ]
 )

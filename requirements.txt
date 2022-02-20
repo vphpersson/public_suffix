@@ -1,2 +1,2 @@
 httpx
--e git+ssh://git@github.com/vphpersson/pyutils.git#egg=pyutils
+git+https://github.com/vphpersson/pyutils.git#egg=pyutils
