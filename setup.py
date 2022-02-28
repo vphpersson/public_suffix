@@ -6,6 +6,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'httpx',
-        'string_utils_py @ git+https://github.com/vphpersson/string_utils_py.git#egg=string_utils_py'
+        'string_utils_py @ git+https://github.com/vphpersson/string_utils_py.git#egg=string_utils_py',
+        'typed_argument_parser @ git+https://github.com/vphpersson/typed_argument_parser.git#egg=typed_argument_parser'
     ]
 )
