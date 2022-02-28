@@ -6,6 +6,6 @@ setup(
     packages=find_packages(),
     install_requires=[
         'httpx',
-        'pyutils @ git+https://github.com/vphpersson/pyutils.git#egg=pyutils'
+        'string_utils_py @ git+https://github.com/vphpersson/string_utils_py.git#egg=string_utils_py'
     ]
 )
