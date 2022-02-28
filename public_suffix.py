@@ -9,7 +9,7 @@ from json import dumps as json_dumps
 from io import TextIOWrapper
 from sys import stdin
 
-from pyutils.my_string import text_align_delimiter
+from string_utils_py import text_align_delimiter
 
 from public_suffix import download_public_suffix_list, DomainProperties
 from public_suffix.trie import PublicSuffixListTrie, PublicSuffixListTrieNode
