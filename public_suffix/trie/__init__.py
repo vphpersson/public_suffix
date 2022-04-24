@@ -1,7 +1,10 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Optional, Iterable, TextIO
+from typing import Iterable, TextIO, Callable, Optional
 from functools import partial
+from pathlib import Path
+
+from public_suffix import DomainProperties
 
 
 @dataclass
@@ -39,11 +42,14 @@ class PublicSuffixListTrieNode(TrieNode):
         return root_node
 
     @classmethod
-    def from_public_suffix_list_file(cls, file: TextIO) -> PublicSuffixListTrieNode:
+    def from_public_suffix_list_file(cls, file: TextIO | Path) -> PublicSuffixListTrieNode:
+
+        lines_iter: Iterable[str] = file.read_text().splitlines() if isinstance(file, Path) else file
+
         return PublicSuffixListTrieNode.from_public_suffix_list(
             rules=(
                 stripped_line.encode(encoding='idna').decode()
-                for line in file
+                for line in lines_iter
                 if (stripped_line := line.strip()) and not stripped_line.startswith('//')
             )
         )
@@ -53,4 +59,7 @@ class PublicSuffixListTrie:
     def __init__(self, root_node: PublicSuffixListTrieNode):
         from public_suffix import get_domain_properties
 
-        self.get_domain_properties = partial(get_domain_properties, root_node=root_node)
+        self.get_domain_properties: Callable[[str], Optional[DomainProperties]] = partial(
+            get_domain_properties,
+            root_node=root_node
+        )
