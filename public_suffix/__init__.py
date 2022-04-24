@@ -1,25 +1,11 @@
-from dataclasses import dataclass
 from typing import Optional, cast
 
 from httpx import AsyncClient
 
-from public_suffix.trie import PublicSuffixListTrieNode
+from public_suffix.structures.domain_properties import DomainProperties
+from public_suffix.structures.public_suffix_list_trie_node import PublicSuffixListTrieNode
 
 PUBLIC_SUFFIX_LIST_URL = 'https://publicsuffix.org/list/public_suffix_list.dat'
-
-
-@dataclass
-class DomainProperties:
-    effective_top_level_domain: str
-    registered_domain: str
-    subdomain: str
-
-    def __str__(self) -> str:
-        return (
-            f'Effective top-level domain (eTLD): {self.effective_top_level_domain}\n'
-            f'Registered domain: {self.registered_domain}\n'
-            f'Subdomain: {self.subdomain}'
-        )
 
 
 def get_domain_properties(root_node: PublicSuffixListTrieNode, domain: str) -> Optional[DomainProperties]:

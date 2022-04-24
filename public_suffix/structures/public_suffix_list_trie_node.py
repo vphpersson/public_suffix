@@ -1,24 +1,24 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Iterable, TextIO, Optional
+from typing import Iterable, TextIO
 from pathlib import Path
 
-from public_suffix import DomainProperties
-
 
 @dataclass
-class TrieNode:
-    key_to_child: dict[str, TrieNode] = field(default_factory=dict)
-
-
-@dataclass
-class PublicSuffixListTrieNode(TrieNode):
+class PublicSuffixListTrieNode:
     dns_name_component: str = ''
     negate: bool = False
+    key_to_child: dict[str, PublicSuffixListTrieNode] = field(default_factory=dict)
 
     @classmethod
     def from_public_suffix_list(cls, rules: Iterable[str]) -> PublicSuffixListTrieNode:
         root_node = cls()
+
+        rules: Iterable[str] = (
+            stripped_rule
+            for rule in rules
+            if (stripped_rule := rule.strip()) and not stripped_rule.startswith('//')
+        )
 
         for rule in rules:
             if rule.startswith('!'):
@@ -52,13 +52,3 @@ class PublicSuffixListTrieNode(TrieNode):
                 if (stripped_line := line.strip()) and not stripped_line.startswith('//')
             )
         )
-
-
-class PublicSuffixListTrie:
-    def __init__(self, root_node: PublicSuffixListTrieNode):
-        self._root_node: PublicSuffixListTrieNode = root_node
-
-    def get_domain_properties(self, domain: str) -> Optional[DomainProperties]:
-        from public_suffix import get_domain_properties
-
-        return get_domain_properties(root_node=self._root_node, domain=domain)

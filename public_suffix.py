@@ -9,21 +9,18 @@ from typing import Type
 from string_utils_py import text_align_delimiter
 
 from public_suffix.cli import PublicSuffixArgumentParser
-from public_suffix import download_public_suffix_list, DomainProperties
-from public_suffix.trie import PublicSuffixListTrie, PublicSuffixListTrieNode
+from public_suffix import download_public_suffix_list
+from public_suffix.structures.public_suffix_list_trie import PublicSuffixListTrie
+from public_suffix.structures.domain_properties import DomainProperties
 
 
 async def main():
     args: Type[PublicSuffixArgumentParser.Namespace] = PublicSuffixArgumentParser().parse_args()
 
-    public_suffix_list_trie = PublicSuffixListTrie(
-        root_node=PublicSuffixListTrieNode.from_public_suffix_list(
-            rules=(
-                stripped_line.encode(encoding='idna').decode()
-                for line in (args.list_file_path.read() if args.list_file_path else (await download_public_suffix_list())).splitlines()
-                if (stripped_line := line.strip()) and not stripped_line.startswith('//')
-            )
-        )
+    public_suffix_list_trie = PublicSuffixListTrie.from_public_suffix_list(
+        rules=(
+            args.list_file_path.read() if args.list_file_path else (await download_public_suffix_list())
+        ).splitlines()
     )
 
     domain_properties_list: list[DomainProperties] = [
