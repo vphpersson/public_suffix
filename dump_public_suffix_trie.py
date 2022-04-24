@@ -7,7 +7,7 @@ from dataclasses import asdict
 
 from public_suffix.cli import DumpPublicSuffixTrieArgumentParser
 from public_suffix import download_public_suffix_list
-from public_suffix.trie import PublicSuffixListTrieNode
+from public_suffix.structures.public_suffix_list_trie_node import PublicSuffixListTrieNode
 
 
 async def main():
@@ -19,10 +19,8 @@ async def main():
             asdict(
                 PublicSuffixListTrieNode.from_public_suffix_list(
                     rules=(
-                        stripped_line.encode(encoding='idna').decode()
-                        for line in (args.list_file_path.read() if args.list_file_path else (await download_public_suffix_list())).splitlines()
-                        if (stripped_line := line.strip()) and not stripped_line.startswith('//')
-                    )
+                        args.list_file_path.read() if args.list_file_path else (await download_public_suffix_list())
+                    ).splitlines()
                 )
             )
         )
