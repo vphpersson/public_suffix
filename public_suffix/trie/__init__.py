@@ -1,7 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Iterable, TextIO, Callable, Optional
-from functools import partial
+from typing import Iterable, TextIO, Optional
 from pathlib import Path
 
 from public_suffix import DomainProperties
@@ -57,9 +56,9 @@ class PublicSuffixListTrieNode(TrieNode):
 
 class PublicSuffixListTrie:
     def __init__(self, root_node: PublicSuffixListTrieNode):
+        self._root_node: PublicSuffixListTrieNode = root_node
+
+    def get_domain_properties(self, domain: str) -> Optional[DomainProperties]:
         from public_suffix import get_domain_properties
 
-        self.get_domain_properties: Callable[[str], Optional[DomainProperties]] = partial(
-            get_domain_properties,
-            root_node=root_node
-        )
+        return get_domain_properties(root_node=self._root_node, domain=domain)
