@@ -1,6 +1,7 @@
-from typing import Optional, cast
-
-from httpx import AsyncClient
+try:
+    from httpx import AsyncClient
+except ImportError:
+    AsyncClient = None
 
 from public_suffix.structures.domain_properties import DomainProperties
 from public_suffix.structures.public_suffix_list_trie_node import PublicSuffixListTrieNode
@@ -8,7 +9,7 @@ from public_suffix.structures.public_suffix_list_trie_node import PublicSuffixLi
 PUBLIC_SUFFIX_LIST_URL = 'https://publicsuffix.org/list/public_suffix_list.dat'
 
 
-def get_domain_properties(root_node: PublicSuffixListTrieNode, domain: str) -> Optional[DomainProperties]:
+def get_domain_properties(root_node: PublicSuffixListTrieNode, domain: str) -> DomainProperties | None:
     """
     Retrieves properties of a domain name using the public suffix list.
 
@@ -19,7 +20,7 @@ def get_domain_properties(root_node: PublicSuffixListTrieNode, domain: str) -> O
 
     dns_name_components: list[str] = domain.lower().split('.')
 
-    match_map: list[Optional[bool]] = [None] * len(dns_name_components)
+    match_map: list[bool | None] = [None] * len(dns_name_components)
 
     def traverse_node(node: PublicSuffixListTrieNode, depth: int = 1) -> None:
         if depth == 1:
@@ -27,7 +28,7 @@ def get_domain_properties(root_node: PublicSuffixListTrieNode, domain: str) -> O
             match_map[-depth] = False
 
         for name in {'*', dns_name_components[-depth]}:
-            next_node = cast(Optional[PublicSuffixListTrieNode], node.key_to_child.get(name))
+            next_node: PublicSuffixListTrieNode | None = node.key_to_child.get(name)
             if next_node is None:
                 continue
 
@@ -62,7 +63,7 @@ async def _download_public_suffix_list(http_client: AsyncClient) -> str:
     return response.text
 
 
-async def download_public_suffix_list(http_client: Optional[AsyncClient] = None) -> str:
+async def download_public_suffix_list(http_client: AsyncClient | None = None) -> str:
     """
     Download the Public Suffix List.
 

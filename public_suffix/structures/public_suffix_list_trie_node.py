@@ -1,6 +1,5 @@
-from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Iterable, TextIO
+from typing import Iterable, TextIO, Self
 from pathlib import Path
 
 
@@ -8,10 +7,10 @@ from pathlib import Path
 class PublicSuffixListTrieNode:
     dns_name_component: str = ''
     negate: bool = False
-    key_to_child: dict[str, PublicSuffixListTrieNode] = field(default_factory=dict)
+    key_to_child: dict[str, Self] = field(default_factory=dict)
 
     @classmethod
-    def from_public_suffix_list(cls, rules: Iterable[str]) -> PublicSuffixListTrieNode:
+    def from_public_suffix_list(cls, rules: Iterable[str]) -> Self:
         root_node = cls()
 
         rules: Iterable[str] = (
@@ -41,7 +40,7 @@ class PublicSuffixListTrieNode:
         return root_node
 
     @classmethod
-    def from_public_suffix_list_file(cls, file: TextIO | Path) -> PublicSuffixListTrieNode:
+    def from_public_suffix_list_file(cls, file: TextIO | Path) -> Self:
 
         lines_iter: Iterable[str] = file.read_text().splitlines() if isinstance(file, Path) else file
 

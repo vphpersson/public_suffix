@@ -1,5 +1,4 @@
 from argparse import ArgumentParser, FileType, Action, Namespace
-from typing import Optional
 from re import compile as re_compile
 from io import TextIOWrapper
 
@@ -12,7 +11,7 @@ class PublicSuffixArgumentParser(TypedArgumentParser):
 
     class Namespace:
         domain_names: set[str]
-        list_file_path: Optional[TextIOWrapper]
+        list_file_path: TextIOWrapper | None
         json: bool
 
     def __init__(self, *args, **kwargs):
@@ -60,8 +59,8 @@ class PublicSuffixArgumentParser(TypedArgumentParser):
             self,
             parser: ArgumentParser,
             namespace: Namespace,
-            domain_name: Optional[str],
-            option_string: Optional[str] = None
+            domain_name: str | None,
+            option_string: str | None = None
         ):
             """Check if an input fully-qualified domain name is in the correct format."""
 
@@ -81,7 +80,7 @@ class PublicSuffixArgumentParser(TypedArgumentParser):
             parser: ArgumentParser,
             namespace: Namespace,
             domain_names_file: TextIOWrapper,
-            option_string: Optional[str] = None
+            option_string: str | None = None
         ):
             domain_names: set[str] = getattr(namespace, 'domain_names', set())
 
@@ -97,7 +96,7 @@ class PublicSuffixArgumentParser(TypedArgumentParser):
 class DumpPublicSuffixTrieArgumentParser(TypedArgumentParser):
 
     class Namespace:
-        list_file_path: Optional[TextIOWrapper]
+        list_file_path: TextIOWrapper | None
 
     def __init__(self, *args, **kwargs):
         super().__init__(
