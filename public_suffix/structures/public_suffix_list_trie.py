@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, Iterable, TextIO
+from typing import Iterable, TextIO
 from pathlib import Path
 
 from public_suffix.structures.public_suffix_list_trie_node import PublicSuffixListTrieNode
@@ -11,7 +11,7 @@ class PublicSuffixListTrie:
     def __init__(self, root_node: PublicSuffixListTrieNode):
         self._root_node: PublicSuffixListTrieNode = root_node
 
-    def get_domain_properties(self, domain: str) -> Optional[DomainProperties]:
+    def get_domain_properties(self, domain: str) -> DomainProperties | None:
         return get_domain_properties(root_node=self._root_node, domain=domain)
 
     @classmethod
