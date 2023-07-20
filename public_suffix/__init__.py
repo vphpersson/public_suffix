@@ -1,10 +1,14 @@
-try:
-    from httpx import AsyncClient
-except ImportError:
-    AsyncClient = None
+from typing import Type
 
 from public_suffix.structures.domain_properties import DomainProperties
 from public_suffix.structures.public_suffix_list_trie_node import PublicSuffixListTrieNode
+
+
+try:
+    from httpx import AsyncClient
+except ImportError:
+    AsyncClient = Type[None]
+
 
 PUBLIC_SUFFIX_LIST_URL = 'https://publicsuffix.org/list/public_suffix_list.dat'
 
