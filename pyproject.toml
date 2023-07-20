@@ -1,6 +1,6 @@
 [project]
 name = "public_suffix"
-version = "0.4"
+version = "0.41"
 dependencies = []
 
 [project.optional-dependencies]
